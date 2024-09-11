@@ -1,12 +1,41 @@
 const sendEmail = require('../utils/sendMail')
+const AuthCode = require('./AuthCode')
+
+const User = require('./User')
 
 const sendVerificationEmail = (req, res) => {
-    console.log(req.body)
-    
+
+
     const code = "HH" + Date.now()
+
+    AuthCode.create({
+        email: req.body.email,
+        code: code,
+        valid_till: Date.now() + 120000
+    })
     sendEmail(req.body.email, "Код авторизации hh", code)
 
     res.status(200).end()
 }
 
-module.exports = {sendVerificationEmail}
+const verifyCode = async (req, res) => {
+    console.log(req.body)
+
+    const authCode = await AuthCode.findOne({where: {email: req.body.email}})
+    if(!authCode){
+        res.status(401).send({error: "cod is invalid"})
+    } else if (new Date(authCode.valid_till).getTime() > Date.now()){
+        res.status(401).send({error: "cod is invalid"})
+    } else {
+        const user = await User.create({
+            
+        })
+    }
+
+    res.status(200).end()
+}
+
+module.exports = {
+    sendVerificationEmail,
+    verifyCode
+}

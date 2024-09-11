@@ -11,9 +11,13 @@ const AuthCode = sequelize.define('AuthCode', {
         allowNull: false,
     },
     valid_till: {
-        type: DataTypes.INTEGER,
+        type: DataTypes.DATE,
         allowNull: false,
     },
-})
+},
+{
+    timestamps: false,
+}
+)
 
 module.exports = AuthCode
