@@ -2,6 +2,7 @@ const sendEmail = require('../utils/sendMail')
 const AuthCode = require('./AuthCode')
 
 const User = require('./User')
+const Role = require('./Role')
 
 const sendVerificationEmail = (req, res) => {
 
@@ -24,15 +25,21 @@ const verifyCode = async (req, res) => {
     const authCode = await AuthCode.findOne({where: {email: req.body.email}})
     if(!authCode){
         res.status(401).send({error: "cod is invalid"})
-    } else if (new Date(authCode.valid_till).getTime() > Date.now()){
+    } else if (new Date(authCode.valid_till).getTime() < Date.now()){
         res.status(401).send({error: "cod is invalid"})
-    } else {
+    } else if (authCode.code != req.body.code){
+        res.status(401).send({error: "cod is invalid"})
+    }
+    else {
+        const role = await Role.findOne({where: {name: 'employee'}})
+        
         const user = await User.create({
-            
+            roleId: role.id,
+            email: req.body.email
         })
+        res.status(200).send(user)
     }
 
-    res.status(200).end()
 }
 
 module.exports = {
